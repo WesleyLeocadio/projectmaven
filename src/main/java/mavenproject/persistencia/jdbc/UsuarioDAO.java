@@ -2,6 +2,7 @@ package mavenproject.persistencia.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import mavenproject.persistencia.entidade.Usuario;
@@ -66,6 +67,36 @@ public class UsuarioDAO {
 			safeClosePreparedStatement(preparador);
 		}
 	}	
+	
+	public void salvar(Usuario u) {
+		if( u.getId()!= null ) {
+			alterar(u);
+		} else {
+			cadastrar(u);
+		}
+	}
+	
+	public Usuario buscaPorId(Integer id) {
+		Usuario usuarioRetorno = null;
+		String sql = "SELECT * FROM usuario where id=?";
+		try {
+			PreparedStatement preparador =  conexao.prepareStatement(sql);
+			preparador.setInt(1, id);
+			//retorno da consulta em ResultSet
+			ResultSet rs = preparador.executeQuery();
+			if(rs.next()) {
+				usuarioRetorno = new Usuario();
+				usuarioRetorno.setId(rs.getInt("id"));
+				usuarioRetorno.setNome(rs.getString("nome"));
+				usuarioRetorno.setLogin(rs.getString("login"));
+				usuarioRetorno.setSenha(rs.getString("senha"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return usuarioRetorno;
+	}
 	
 	/**
 	 * Fechando o objeto preparador
