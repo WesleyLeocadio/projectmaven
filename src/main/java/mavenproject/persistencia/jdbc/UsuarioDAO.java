@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import mavenproject.persistencia.entidade.Usuario;
 
@@ -94,6 +96,60 @@ public class UsuarioDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		return usuarioRetorno;
+	}
+	/**
+	 * Realiza a busca de todos os registros da tabela de usuários do banco
+	 * @return Uma lista usuários
+	 */
+	public List<Usuario> buscaPorTodos() {
+		List<Usuario> lista = new ArrayList<Usuario>();
+		String sql = "SELECT * FROM usuario;";
+		try {
+			PreparedStatement preparador =  conexao.prepareStatement(sql);
+			//retorno da consulta em ResultSet
+			ResultSet rs = preparador.executeQuery();
+			while(rs.next()) {
+				Usuario usuarioRetorno = new Usuario();
+				usuarioRetorno.setId(rs.getInt("id"));
+				usuarioRetorno.setNome(rs.getString("nome"));
+				usuarioRetorno.setLogin(rs.getString("login"));
+				usuarioRetorno.setSenha(rs.getString("senha"));
+				lista.add(usuarioRetorno);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return lista;
+	}
+	
+	public Usuario autenticar(String login, String senha) {
+		Usuario usuarioRetorno = null;
+		PreparedStatement preparador = null;
+		
+		String sql = "SELECT * FROM usuario WHERE login = ? and senha = ?;";
+
+		try {
+			preparador =  conexao.prepareStatement(sql);
+			preparador.setString(1, login);
+			preparador.setString(2, senha);
+
+			ResultSet rs = preparador.executeQuery();
+			if(rs.next()) {
+				usuarioRetorno = new Usuario();
+				usuarioRetorno.setId(rs.getInt("id"));
+				usuarioRetorno.setLogin(rs.getString("login"));
+				usuarioRetorno.setNome(rs.getString("nome"));
+				usuarioRetorno.setSenha(rs.getString("senha"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			safeClosePreparedStatement(preparador);
+		}
+
 		
 		return usuarioRetorno;
 	}
